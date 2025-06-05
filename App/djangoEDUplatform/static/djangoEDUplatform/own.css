@@ -1,0 +1,127 @@
+/* Reset some defaults */
+body, html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  animation: bgmove 20s ease-in-out infinite alternate;
+}
+
+@keyframes bgmove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Center the main content vertically and horizontally */
+#quotes {
+  margin: 60px auto 20px auto;
+  max-width: 700px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 30px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  padding: 40px 30px;
+  text-align: center;
+  border: 2px solid #ffb347;
+  position: relative;
+  /* Add flex properties for extra centering */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+#quotes:before {
+  content: "❝";
+  font-size: 60px;
+  color: #ffb347;
+  position: absolute;
+  left: 30px;
+  top: 10px;
+  opacity: 0.3;
+}
+
+#quotes-text {
+  font-size: 2rem;
+  color: #333;
+  font-style: italic;
+  background: linear-gradient(90deg, #ffb347, #ffcc33, #fcb69f, #a1c4fd, #c2e9fb);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: gradientText 8s linear infinite;
+}
+
+@keyframes gradientText {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+button#next-quote {
+  display: block;
+  margin: 30px auto 0 auto;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(90deg, #ffb347 0%, #ffcc33 100%);
+  border: none;
+  border-radius: 25px;
+  box-shadow: 0 4px 16px rgba(255, 179, 71, 0.2);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  letter-spacing: 2px;
+}
+
+button#next-quote:hover {
+  background: linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%);
+  color: #ffb347;
+  transform: scale(1.07) rotate(-2deg);
+  box-shadow: 0 8px 32px rgba(161, 196, 253, 0.3);
+}
+
+form {
+  margin: 40px auto 0 auto;
+  text-align: center;
+}
+
+select#categories {
+  padding: 12px 30px;
+  border-radius: 20px;
+  border: 2px solid #a1c4fd;
+  background: linear-gradient(90deg, #c2e9fb 0%, #a1c4fd 100%);
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(161, 196, 253, 0.15);
+  outline: none;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+select#categories:focus {
+  border: 2px solid #ffb347;
+  box-shadow: 0 4px 16px rgba(255, 179, 71, 0.2);
+}
+
+option {
+  background: #fffbe7;
+  color: #333;
+}
+
+@media (max-width: 600px) {
+  #quotes {
+    padding: 25px 10px;
+    font-size: 1.1rem;
+  }
+  button#next-quote {
+    width: 90%;
+    font-size: 1rem;
+    padding: 12px 0;
+  }
+  select#categories {
+    width: 90%;
+    font-size: 1rem;
+  }
+}
