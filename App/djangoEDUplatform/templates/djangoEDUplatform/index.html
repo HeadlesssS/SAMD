@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlatform - Learn Without Limits</title>
+    <title>SAMD - Learn Without Limits</title>
     <link rel="stylesheet" href="{% static 'djangoEDUplatform/styles.css' %}">
 </head>
 <body>
@@ -12,7 +12,7 @@
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <h2>EduPlatform</h2>
+                    <h2>SAMD</h2>
                 </div>
                 <ul class="nav-menu">
                     <li><a href="#home">Home</a></li>
@@ -35,7 +35,7 @@
                     <p>Access thousands of courses from expert teachers. Choose your plan and start your learning journey today.</p>
                     <div class="hero-buttons">
                         <a href="#plans" class="btn btn-primary">View Plans</a>
-                        <a href="student.html" class="btn btn-secondary">Start Learning</a>
+                        <a href="{% url 'student' %}" class="btn btn-secondary">Start Learning</a>
                     </div>
                 </div>
                 <div class="hero-image">
@@ -46,7 +46,7 @@
 
         <section id="about" class="about">
             <div class="container">
-                <h2>Why Choose EduPlatform?</h2>
+                <h2>Why Choose SAMD?</h2>
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="feature-icon">📚</div>
@@ -161,13 +161,14 @@
         </section>
 
         <section id="contact" class="contact">
+
             <div class="container">
                 <h2>Get In Touch</h2>
                 <div class="contact-content">
                     <div class="contact-info">
                         <h3>Contact Information</h3>
                         <div class="contact-item">
-                            <strong>Email:</strong> support@eduplatform.com
+                            <strong>Email:</strong> support@SAMD.com
                         </div>
                         <div class="contact-item">
                             <strong>Phone:</strong> +1 (555) 123-4567
@@ -176,8 +177,13 @@
                             <strong>Address:</strong> 123 Education St, Learning City, LC 12345
                         </div>
                     </div>
-                    <div class="contact-form">
-                        <form>
+                    {% if success %}
+                    <p>Email sent successfully</p>
+                    {% endif %}
+                    
+                    <div class="contact-form" >
+                        <form method="POST" action="#contact">
+                        {% csrf_token %}
                             <input name="emailName" type="text" placeholder="Your Name" required>
                             <input name="emailEmail" type="email" placeholder="Your Email" required>
                             <textarea name="emailMessage" placeholder="Your Message" rows="5" required></textarea>
@@ -193,7 +199,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>EduPlatform</h3>
+                    <h3>SAMD</h3>
                     <p>Empowering learners worldwide with quality education and flexible learning options.</p>
                 </div>
                 <div class="footer-section">
@@ -215,7 +221,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 EduPlatform. All rights reserved.</p>
+                <p>&copy; 2024 SAMD. All rights reserved.</p>
             </div>
         </div>
     </footer>

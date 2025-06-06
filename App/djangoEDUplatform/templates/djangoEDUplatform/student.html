@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - EduPlatform</title>
+    <title>Student Dashboard - SAMD</title>
     <link rel="stylesheet" href="{% static 'djangoEDUplatform/styles.css' %}">
 </head>
 <body>
@@ -12,11 +12,10 @@
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <h2>EduPlatform</h2>
+                    <h2>SAMD</h2>
                 </div>
                 <ul class="nav-menu">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="{% url 'home' %}">Home</a></li>
                     <li><a href="#" onclick="logout()">Logout</a></li>
                 </ul>
             </div>
