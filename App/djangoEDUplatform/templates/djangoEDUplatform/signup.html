@@ -15,10 +15,10 @@
                     <h2>SAMD</h2>
                 </div>
                 <ul class="nav-menu">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="login.html">Login</a></li>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'login' %}">Login</a></li>
                 </ul>
-            </div>
+            </div> 
         </nav>
     </header>
 
@@ -32,9 +32,10 @@
                     </div>
 
                     <div class="auth-form">
-                        <form id="signupForm">
+                        <form id="signupForm" method="post">
+                        {% csrf_token %}
                             <div class="form-group">
-                                <label for="userType">I am a</label>
+                                <label for="userType">I am a: </label>
                                 <div class="user-type-selector">
                                     <div class="user-type-option">
                                         <input type="radio" id="student" name="userType" value="student" checked>
@@ -49,34 +50,40 @@
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="firstName">First Name</label>
-                                    <input type="text" id="firstName" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="lastName">Last Name</label>
-                                    <input type="text" id="lastName" required>
+                                    <label for="fullName">Full Name</label>
+                                    <input type="text" id="fullName" name="fullName" required>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label for="email">Email Address</label>
-                                <input type="email" id="email" required>
+                                <input type="email" id="email" name="email" required>
                             </div>
                             
                             <div class="form-group">
                                 <label for="password">Password</label>
-                                <input type="password" id="password" required>
-                                <div class="password-strength">
+                                <input type="password" id="password" name="password" required>
+                                {% comment %} <div class="password-strength">
                                     <div class="strength-meter">
                                         <div class="strength-bar" id="passwordStrength"></div>
                                     </div>
                                     <span id="passwordFeedback">Password strength</span>
-                                </div>
+                                </div> {% endcomment %}
                             </div>
                             
                             <div class="form-group">
                                 <label for="confirmPassword">Confirm Password</label>
-                                <input type="password" id="confirmPassword" required>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone_number">Phone Number</label>
+                                <input type="text" id="phone_number" name="phone_number" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="esewa_id">eSewa ID</label>
+                                <input type="number" id="esewa_id" name="esewa_id" required>
                             </div>
                             
                             <div class="form-group">
@@ -85,6 +92,10 @@
                                     <label for="termsAgree">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
                                 </div>
                             </div>
+                            
+                            {% if error %}
+    <div class="form-error" style="color:red;">{{ error }}</div>
+{% endif %}
                             
                             <div class="form-error" id="signupError"></div>
                             
@@ -109,7 +120,7 @@
                 </div>
                 
                 <div class="auth-image">
-                    <img src="/placeholder.svg?height=600&width=500" alt="Students learning online">
+                    <img src="{% static 'djangoEDUplatform/images/image.png' %}" alt="Students learning online">
                     <div class="auth-overlay">
                         <div class="auth-quote">
                             <h3>"The beautiful thing about learning is that no one can take it away from you."</h3>

@@ -1,4 +1,8 @@
 {% load static %}
+{% if User.objects.get("role")=="teacher":
+
+
+%}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,7 +20,7 @@
                 </div>
                 <ul class="nav-menu">
                     <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="#" onclick="logout()">Logout</a></li>
+                    <li><a href="{% url 'logout' %}" onclick="logout()">Logout</a></li>
                 </ul>
             </div>
         </nav>
@@ -39,7 +43,7 @@
                         <div class="current-plan" id="planDetails">
                             <p>Current: <strong id="planType">Free</strong></p>
                             <p>Access Level: <span id="accessLevel">Basic</span></p>
-                            <a href="payment.html" class="btn btn-primary btn-small">Upgrade Plan</a>
+                            <a href="{% url 'payment' %}" class="btn btn-primary btn-small">Upgrade Plan</a>
                         </div>
                     </div>
                     

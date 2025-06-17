@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'djangoEDUplatform'
+    'djangoEDUplatform',
+    'django_esewa',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,6 @@ EMAIL_USE_TLS=True
 
 EMAIL_HOST_USER="aaryanarju@gmail.com"
 EMAIL_HOST_PASSWORD="psyq wcub fzqz unuu"
+DEFAULT_FROM_EMAIL = 'SAMD <aaryanarju@gmail.com>'
+
+

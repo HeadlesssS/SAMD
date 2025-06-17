@@ -407,7 +407,6 @@ function initializePaymentPage() {
         selectPlan(selectedPlan);
     }
 
-    setupPaymentForm();
     setupPlanSelection();
 }
 
@@ -448,31 +447,14 @@ function selectPlan(planType) {
     
     if (planType === 'free') {
         cardSection.style.display = 'none';
-        paymentButton.textContent = 'Create Free Account';
+        paymentButton.textContent = 'Continue to your free account';
     } else {
         cardSection.style.display = 'block';
         paymentButton.textContent = 'Complete Payment';
     }
 }
 
-function setupPaymentForm() {
-    const paymentForm = document.getElementById('paymentForm');
-    if (paymentForm) {
-        paymentForm.addEventListener('submit', handlePayment);
-    }
 
-    // Format card number input
-    const cardNumberInput = document.getElementById('cardNumber');
-    if (cardNumberInput) {
-        cardNumberInput.addEventListener('input', formatCardNumber);
-    }
-
-    // Format expiry date input
-    const expiryInput = document.getElementById('expiryDate');
-    if (expiryInput) {
-        expiryInput.addEventListener('input', formatExpiryDate);
-    }
-}
 
 function formatCardNumber(e) {
     let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
@@ -491,29 +473,25 @@ function formatExpiryDate(e) {
 function handlePayment(e) {
     e.preventDefault();
     
-    const selectedPlan = document.querySelector('input[name="plan"]:checked').value;
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
-
-    // Simulate payment processing
-    setTimeout(() => {
-        // Create user account
-        currentUser = {
-            type: 'student',
-            name: `${firstName} ${lastName}`,
-            email: email,
-            plan: selectedPlan
-        };
-
-        saveData();
-        showSuccessModal();
-    }, 2000);
-
-    // Show loading state
-    const paymentButton = document.getElementById('paymentButton');
-    paymentButton.textContent = 'Processing...';
-    paymentButton.disabled = true;
+    const selectedPlan = document.querySelector('input[name="plan"]:checked');
+    if (!selectedPlan) {
+        alert("Please select a payment plan.");
+        return false;
+    }
+    
+    // Get the form that contains the payment button
+    const form = e.target.closest('form');
+    if (form) {
+        // Show loading state
+        const paymentButton = document.getElementById('paymentButton');
+        if (paymentButton) {
+            paymentButton.textContent = 'Processing...';
+            paymentButton.disabled = true;
+        }
+        
+        // Submit the form to process the payment
+        form.submit();
+    }
 }
 
 function showSuccessModal() {
@@ -521,12 +499,6 @@ function showSuccessModal() {
     modal.style.display = 'block';
 }
 
-// Utility Functions
-function logout() {
-    localStorage.removeItem('eduplatform_user');
-    currentUser = null;
-    window.location.href = 'index.html';
-}
 
 function closeCourseModal() {
     const modal = document.getElementById('courseModal');
@@ -560,107 +532,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Initialize based on current page
-document.addEventListener('DOMContentLoaded', function() {
-    const currentPage = window.location.pathname.split('/').pop();
-    
-    switch(currentPage) {
-        case 'student.html':
-            initializeStudentDashboard();
-            break;
-        case 'teacher.html':
-            initializeTeacherDashboard();
-            break;
-        case 'payment.html':
-            initializePaymentPage();
-            break;
-        default:
-            initializeData();
-    }
-});
 
 
-
-
-
-// Login Page Functions
-function initializeLoginPage() {
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
-    }
-    
-    // Check if user is already logged in
-    const currentUser = JSON.parse(localStorage.getItem('eduplatform_user'));
-    if (currentUser) {
-        redirectLoggedInUser(currentUser);
-    }
-}
-
-function handleLogin(e) {
-    e.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const rememberMe = document.getElementById('rememberMe').checked;
-    const errorElement = document.getElementById('loginError');
-    
-    // Reset error message
-    errorElement.textContent = '';
-    
-    // Simple validation
-    if (!email || !password) {
-        errorElement.textContent = 'Please enter both email and password.';
-        return;
-    }
-    
-}
-
-function redirectLoggedInUser(user) {
-    if (user.type === 'student') {
-        window.location.href = 'student.html';
-    } else if (user.type === 'teacher') {
-        window.location.href = 'teacher.html';
-    } else {
-        window.location.href = 'index.html';
-    }
-}
-
-function handleSignup(e) {
-    e.preventDefault();
-    
-    const userType = document.querySelector('input[name="userType"]:checked').value;
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const termsAgree = document.getElementById('termsAgree').checked;
-    const errorElement = document.getElementById('signupError');
-    
-    // Reset error message
-    errorElement.textContent = '';
-    
-    // Validation
-    if (!firstName || !lastName || !email || !password) {
-        errorElement.textContent = 'Please fill in all required fields.';
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        errorElement.textContent = 'Passwords do not match.';
-        return;
-    }
-    
-    if (password.length < 6) {
-        errorElement.textContent = 'Password must be at least 6 characters long.';
-        return;
-    }
-    
-    if (!termsAgree) {
-        errorElement.textContent = 'You must agree to the Terms of Service and Privacy Policy.';
-        return;
-    }
     
     
 
@@ -699,16 +572,20 @@ function updatePasswordStrength() {
         feedback.style.color = '#10b981';
     }
 }
-}
 
-
-
-// //mail
-// document.getElementById("contact-form").addEventListener('submit',async function (e) {
-//     e.preventDefault();
-
-//     const formData=new FormData(this);
-//     const data =Object.fromEntries(formData.entries());
-
-//     const res
-// })
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentForm = document.getElementById('paymentForm');
+    if (paymentForm) {
+        // If the form already has the Esewa hidden fields, don't add event listener
+        // that would prevent form submission
+        if (!paymentForm.querySelector('input[name="signature"]')) {
+            paymentForm.addEventListener('submit', function(e) {
+                const selectedPlan = document.querySelector('input[name="plan_id"]:checked');
+                if (!selectedPlan) {
+                    alert("Please select a payment plan.");
+                    e.preventDefault();
+                }
+            });
+        }
+    }
+});
