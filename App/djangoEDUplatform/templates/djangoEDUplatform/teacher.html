@@ -72,20 +72,21 @@
 
                     <div id="uploadTab" class="tab-content">
                         <h2>Upload New Course</h2>
-                        <form id="courseUploadForm" class="upload-form">
+                        <form id="courseUploadForm" class="upload-form" method="POST" action="{% url 'upload_course' %}" enctype="multipart/form-data" onsubmit="handleCourseUpload(event)">
+                            {% csrf_token %}
                             <div class="form-group">
                                 <label for="courseTitle">Course Title</label>
-                                <input type="text" id="courseTitle" required>
+                                <input type="text" id="courseTitle" name="title" required>
                             </div>
                             
                             <div class="form-group">
                                 <label for="courseDescription">Description</label>
-                                <textarea id="courseDescription" rows="4" required></textarea>
+                                <textarea id="courseDescription" name="description" rows="4" required></textarea>
                             </div>
                             
                             <div class="form-group">
                                 <label for="courseCategory">Category</label>
-                                <select id="courseCategory" required>
+                                <select id="courseCategory" name="category" required>
                                     <option value="">Select Category</option>
                                     <option value="programming">Programming</option>
                                     <option value="design">Design</option>
@@ -96,7 +97,7 @@
                             
                             <div class="form-group">
                                 <label for="requiredPlan">Required Plan</label>
-                                <select id="requiredPlan" required>
+                                <select id="requiredPlan" name="required_plan" required>
                                     <option value="free">Free</option>
                                     <option value="standard">Standard</option>
                                     <option value="premium">Premium</option>
@@ -105,7 +106,7 @@
                             
                             <div class="form-group">
                                 <label for="contentType">Content Type</label>
-                                <select id="contentType" onchange="toggleContentInput()" required>
+                                <select id="contentType" name="content_type" onchange="toggleContentInput()" required>
                                     <option value="">Select Type</option>
                                     <option value="pdf">PDF Document</option>
                                     <option value="video">Video Link</option>
@@ -114,12 +115,12 @@
                             
                             <div class="form-group" id="pdfUpload" style="display: none;">
                                 <label for="pdfFile">Upload PDF</label>
-                                <input type="file" id="pdfFile" accept=".pdf">
+                                <input type="file" id="pdfFile" name="content_file" accept=".pdf">
                             </div>
                             
                             <div class="form-group" id="videoLink" style="display: none;">
                                 <label for="videoUrl">Video URL</label>
-                                <input type="url" id="videoUrl" placeholder="https://example.com/video.mp4">
+                                <input type="url" id="videoUrl" name="video_url" placeholder="https://example.com/video.mp4">
                             </div>
                             
                             <button type="submit" class="btn btn-primary">Upload Course</button>

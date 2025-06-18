@@ -2,13 +2,19 @@ from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
-from .models import Paymentplans, UserProfile,Teacher,Transaction
+from .models import Paymentplans, UserProfile,Teacher,Transaction,Course,Enrollment
 from django.contrib.auth import login,authenticate,logout
 from django_esewa import EsewaPayment
 import uuid
 import hmac
 import hashlib
 import base64
+from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
+import requests
+from urllib.parse import urlparse
+import os
+import json
 
 
 def generate_signature(key, message):
@@ -78,10 +84,12 @@ def payment(request):
         )
 
         # Build the message as per Esewa's requirement
-        message = f'total_amount={selected_plan.price},transaction_uuid={auuid},product_code=EPAYTEST'
-        secret_key = "8gBm/:&EnhH.1/q"  # Use your actual secret key
-
-        signature = generate_signature(secret_key, message)
+        signature = generate_signature(
+            total_amount=selected_plan.price,
+            transaction_uuid=auuid,
+            key="8gBm/:&EnhH.1/q",  # Use your actual secret key
+            product_code="EPAYTEST"
+        )
 
         epayment = EsewaPayment(
             success_url="http://localhost:8000/success/",
@@ -90,8 +98,8 @@ def payment(request):
             product_code="EPAYTEST",
             amount=selected_plan.price,
             total_amount=selected_plan.price,
-            transaction_uuid=auuid,
-            signature=signature  # Pass the generated signature
+            transaction_uuid=auuid
+            # Remove the signature parameter
         )
 
         # No need to call epayment.create_signature() since you already generated it
@@ -108,18 +116,43 @@ def payment(request):
         "role": role,
         "payment_plans": payment_plans
     })
-sdfdfssdsdf
 def student(request):
-    print("if loop ma aayo")
     if request.user.is_authenticated:
         try:
-            # Try to get the userprofile
+            # Get the userprofile
             profile = request.user.userprofile
             if profile.role.lower() == "student":
-                print("vitra")
-                return render(request, "djangoEDUplatform/student.html")
+                # Get all courses
+                courses = Course.objects.all()
+                
+                # Get user's plan
+                try:
+                    enrollment = Enrollment.objects.filter(user=request.user, is_active=True).latest('start_date')
+                    user_plan = enrollment.plan.plan_type
+                except:
+                    user_plan = 'free'  # Default to free plan if no active enrollment
+                
+                # Convert courses to JSON for JavaScript
+                courses_data = []
+                for course in courses:
+                    courses_data.append({
+                        'id': course.id,
+                        'title': course.title,
+                        'description': course.description,
+                        'category': course.category,
+                        'requiredPlan': course.requiredPlan,
+                        'contentType': course.contentType,
+                        'contentUrl': request.build_absolute_uri(course.contentFile.url) if course.contentFile else '',
+                        'teacherId': course.teacher.id,
+                        'enrolledStudents': course.enrolledStudents
+                    })
+                
+                return render(request, "djangoEDUplatform/student.html", {
+                    'courses_json': json.dumps(courses_data),
+                    'user_plan': user_plan,
+                    'user_name': request.user.get_full_name() or request.user.username
+                })
         except UserProfile.DoesNotExist:
-            print("UserProfile does not exist")
             pass
     return redirect('login')  # or some error page
 
@@ -215,3 +248,58 @@ def failure(request):
 def logout_view(request):
     logout(request)
     return redirect('home')
+
+@login_required
+def upload_course(request):
+    if request.method == "POST":
+        try:
+            user_profile = request.user.userprofile
+            teacher = Teacher.objects.get(profile=user_profile)
+            
+            title = request.POST.get('title')
+            description = request.POST.get('description')
+            category = request.POST.get('category')
+            required_plan = request.POST.get('required_plan')
+            content_type = request.POST.get('content_type')
+            
+            course = Course(
+                title=title,
+                description=description,
+                category=category,
+                requiredPlan=required_plan,
+                contentType=content_type,
+                teacher=teacher,
+                enrolledStudents=0
+            )
+            
+            if content_type == 'pdf':
+                if 'content_file' in request.FILES:
+                    course.contentFile = request.FILES['content_file']
+                else:
+                    return render(request, "djangoEDUplatform/teacher.html", {
+                        "error": "Please upload a PDF file."
+                    })
+            elif content_type == 'video':
+                video_url = request.POST.get('video_url')
+                if video_url:
+                    filename = f"video_link_{title.replace(' ', '_')}.txt"
+                    content = ContentFile(video_url.encode('utf-8'))
+                    course.contentFile.save(filename, content, save=False)
+                else:
+                    return render(request, "djangoEDUplatform/teacher.html", {
+                        "error": "Please provide a video URL."
+                    })
+            
+            course.save()
+            return render(request, "djangoEDUplatform/teacher.html", {
+                "success": "Course uploaded successfully!"
+            })
+            
+        except (UserProfile.DoesNotExist, Teacher.DoesNotExist):
+            return redirect('login')
+        except Exception as e:
+            return render(request, "djangoEDUplatform/teacher.html", {
+                "error": f"Error uploading course: {str(e)}"
+            })
+    
+    return redirect('teacher')

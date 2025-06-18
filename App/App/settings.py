@@ -1,5 +1,6 @@
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,5 +124,9 @@ EMAIL_USE_TLS=True
 EMAIL_HOST_USER="aaryanarju@gmail.com"
 EMAIL_HOST_PASSWORD="psyq wcub fzqz unuu"
 DEFAULT_FROM_EMAIL = 'SAMD <aaryanarju@gmail.com>'
+
+# Add these settings for file uploads
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 

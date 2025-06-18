@@ -4,108 +4,38 @@ let courses = [];
 let teachers = [];
 let enrollments = [];
 
-// Initialize data
-function initializeData() {
-    // Sample courses data
-    courses = [
-        {
-            id: 1,
-            title: "JavaScript Fundamentals",
-            description: "Learn the basics of JavaScript programming",
-            category: "programming",
-            requiredPlan: "free",
-            contentType: "video",
-            contentUrl: "https://example.com/js-basics.mp4",
-            teacherId: 1,
-            enrolledStudents: 150
-        },
-        {
-            id: 2,
-            title: "Advanced React Development",
-            description: "Master React with hooks, context, and advanced patterns",
-            category: "programming",
-            requiredPlan: "standard",
-            contentType: "pdf",
-            contentUrl: "/placeholder.pdf",
-            teacherId: 1,
-            enrolledStudents: 89
-        },
-        {
-            id: 3,
-            title: "UI/UX Design Principles",
-            description: "Learn modern design principles and user experience",
-            category: "design",
-            requiredPlan: "premium",
-            contentType: "video",
-            contentUrl: "https://example.com/design-course.mp4",
-            teacherId: 2,
-            enrolledStudents: 67
-        },
-        {
-            id: 4,
-            title: "Digital Marketing Strategy",
-            description: "Complete guide to digital marketing and social media",
-            category: "marketing",
-            requiredPlan: "standard",
-            contentType: "pdf",
-            contentUrl: "/placeholder.pdf",
-            teacherId: 2,
-            enrolledStudents: 123
-        }
-    ];
-
-    // Sample teachers data
-    teachers = [
-        {
-            id: 1,
-            name: "John Smith",
-            email: "john@example.com",
-            totalEarnings: 435.50,
-            courses: [1, 2]
-        },
-        {
-            id: 2,
-            name: "Sarah Johnson",
-            email: "sarah@example.com",
-            totalEarnings: 285.75,
-            courses: [3, 4]
-        }
-    ];
-
-    // Load from localStorage if available
-    const savedCourses = localStorage.getItem('eduplatform_courses');
-    const savedTeachers = localStorage.getItem('eduplatform_teachers');
-    const savedUser = localStorage.getItem('eduplatform_user');
-
-    if (savedCourses) courses = JSON.parse(savedCourses);
-    if (savedTeachers) teachers = JSON.parse(savedTeachers);
-    if (savedUser) currentUser = JSON.parse(savedUser);
-}
-
-// Save data to localStorage
-function saveData() {
-    localStorage.setItem('eduplatform_courses', JSON.stringify(courses));
-    localStorage.setItem('eduplatform_teachers', JSON.stringify(teachers));
-    if (currentUser) {
-        localStorage.setItem('eduplatform_user', JSON.stringify(currentUser));
-    }
-}
 
 // Student Dashboard Functions
 function initializeStudentDashboard() {
-    initializeData();
+    // If coursesData is available from the server, use it
+    if (typeof coursesData !== 'undefined') {
+        courses = coursesData;
+    } else {
+        // Fallback to sample data if server data is not available
+        initializeData();
+    }
     
-    // Set default user if none exists
-    if (!currentUser) {
+    // Set user data
+    if (typeof userPlan !== 'undefined') {
+        if (!currentUser) {
+            currentUser = {
+                type: 'student',
+                name: document.getElementById('studentName').textContent.replace('Welcome, ', '').replace('!', ''),
+                plan: userPlan
+            };
+        } else {
+            currentUser.plan = userPlan;
+        }
+    } else if (!currentUser) {
+        // Fallback if no server data
         currentUser = {
             type: 'student',
             name: 'Demo Student',
             email: 'student@example.com',
             plan: 'free'
         };
-        saveData();
     }
-
+    
     updateStudentUI();
     loadCourses();
     setupFilters();
@@ -169,7 +99,20 @@ function openCourse(course) {
     if (course.contentType === 'pdf') {
         openPdfModal(course.contentUrl);
     } else if (course.contentType === 'video') {
-        openVideoModal(course.contentUrl);
+        // For video URLs stored in text files, we need to fetch the content
+        if (course.contentUrl.endsWith('.txt')) {
+            fetch(course.contentUrl)
+                .then(response => response.text())
+                .then(videoUrl => {
+                    openVideoModal(videoUrl.trim());
+                })
+                .catch(error => {
+                    console.error('Error fetching video URL:', error);
+                    alert('Error loading video. Please try again later.');
+                });
+        } else {
+            openVideoModal(course.contentUrl);
+        }
     }
 }
 
@@ -331,57 +274,79 @@ function handleCourseUpload(e) {
     const requiredPlan = document.getElementById('requiredPlan').value;
     const contentType = document.getElementById('contentType').value;
     
-    let contentUrl = '';
+    // Validate form fields
+    if (!title || !description || !category || !requiredPlan || !contentType) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    // Additional validation for content files
     if (contentType === 'pdf') {
         const pdfFile = document.getElementById('pdfFile').files[0];
-        if (pdfFile) {
-            contentUrl = URL.createObjectURL(pdfFile);
+        if (!pdfFile) {
+            alert('Please upload a PDF file');
+            return;
         }
     } else if (contentType === 'video') {
-        contentUrl = document.getElementById('videoUrl').value;
+        const videoUrl = document.getElementById('videoUrl').value;
+        if (!videoUrl) {
+            alert('Please provide a video URL');
+            return;
+        }
     }
-
-    const newCourse = {
-        id: courses.length + 1,
-        title,
-        description,
-        category,
-        requiredPlan,
-        contentType,
-        contentUrl,
-        teacherId: currentUser.id,
-        enrolledStudents: 0
-    };
-
-    courses.push(newCourse);
     
-    // Update teacher's courses
-    const teacher = teachers.find(t => t.id === currentUser.id);
-    if (teacher) {
-        teacher.courses.push(newCourse.id);
+    // Get the form that contains the submit button
+    const form = e.target;
+    if (form) {
+        // Show loading state
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.textContent = 'Uploading...';
+            submitButton.disabled = true;
+        }
+        
+        // Submit the form to process the upload
+        form.submit();
     }
-
-    saveData();
-    loadTeacherCourses();
-    updateTeacherUI();
-    
-    // Reset form
-    uploadForm.reset();
-    toggleContentInput();
-    
-    alert('Course uploaded successfully!');
 }
 
 function toggleContentInput() {
     const contentType = document.getElementById('contentType').value;
     const pdfUpload = document.getElementById('pdfUpload');
     const videoLink = document.getElementById('videoLink');
-
-    pdfUpload.style.display = contentType === 'pdf' ? 'block' : 'none';
-    videoLink.style.display = contentType === 'video' ? 'block' : 'none';
+    
+    if (contentType === 'pdf') {
+        pdfUpload.style.display = 'block';
+        videoLink.style.display = 'none';
+    } else if (contentType === 'video') {
+        pdfUpload.style.display = 'none';
+        videoLink.style.display = 'block';
+    } else {
+        pdfUpload.style.display = 'none';
+        videoLink.style.display = 'none';
+    }
 }
 
-// Tab functionality
+// Initialize the form when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const contentTypeSelect = document.getElementById('contentType');
+    if (contentTypeSelect) {
+        toggleContentInput();
+    }
+    
+    // Display success or error messages if they exist
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    
+    if (success) {
+        alert(success);
+    }
+    
+    if (error) {
+        alert(error);
+    }
+}); // Tab functionality
 function showTab(tabName) {
     // Hide all tab contents
     const tabContents = document.querySelectorAll('.tab-content');
@@ -395,7 +360,46 @@ function showTab(tabName) {
     document.getElementById(tabName + 'Tab').classList.add('active');
     
     // Add active class to clicked button
-    event.target.classList.add('active');
+    // Use querySelector instead of event.target since this might be called programmatically
+    const activeButton = document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+}
+
+// Add this function to handle the "Upload Course" quick action button
+function showUploadForm() {
+    // Show the upload tab
+    showTab('upload');
+    
+    // Find all tab buttons
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    // Remove active class from all buttons
+    tabButtons.forEach(button => button.classList.remove('active'));
+    
+    // Add active class to the upload tab button
+    const uploadTabButton = document.querySelector('.tab-button[onclick="showTab(\'upload\')"]');
+    if (uploadTabButton) {
+        uploadTabButton.classList.add('active');
+    }
+}
+
+// Function to show earnings details
+function showEarningsDetails() {
+    showTab('earnings');
+    
+    // Find all tab buttons
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    // Remove active class from all buttons
+    tabButtons.forEach(button => button.classList.remove('active'));
+    
+    // Add active class to the earnings tab button
+    const earningsTabButton = document.querySelector('.tab-button[onclick="showTab(\'earnings\')"]');
+    if (earningsTabButton) {
+        earningsTabButton.classList.add('active');
+    }
 }
 
 // Payment Page Functions

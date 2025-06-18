@@ -53,3 +53,18 @@ class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     status=models.CharField(max_length=100,choices=[('pending','Pending'),('completed','Completed'),('failed','Failed')],default='pending')
 
+class Course(models.Model):
+    title=models.CharField(max_length=100)
+    description=models.TextField()
+    category=models.CharField(max_length=100)
+    requiredPlan=models.CharField(max_length=100,choices=[('free','Free Plan'),('standard','Standard Plan'),('premium','Premium Plan')])
+    contentType=models.CharField(max_length=100,choices=[('pdf','PDF'),('video','Video')])
+    contentFile=models.FileField() 
+    teacher=models.ForeignKey(Teacher,on_delete=models.CASCADE)
+    enrolledStudents=models.IntegerField(default=0)
+
+class Enrollment(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    course=models.ForeignKey(Course,on_delete=models.CASCADE)
+    timestamp=models.DateTimeField(auto_now_add=True)
+ 

@@ -31,8 +31,8 @@
             <div class="dashboard-header">
                 <h1>Student Dashboard</h1>
                 <div class="user-info">
-                    <span id="studentName">Welcome, Student!</span>
-                    <span class="plan-badge" id="currentPlan">Free Plan</span>
+                    <span id="studentName">Welcome, {{ user_name }}!</span>
+                    <span class="plan-badge" id="currentPlan">{{ user_plan|title }} Plan</span>
                 </div>
             </div>
 
@@ -41,8 +41,16 @@
                     <div class="plan-info">
                         <h3>Your Plan</h3>
                         <div class="current-plan" id="planDetails">
-                            <p>Current: <strong id="planType">Free</strong></p>
-                            <p>Access Level: <span id="accessLevel">Basic</span></p>
+                            <p>Current: <strong id="planType">{{ user_plan|title }}</strong></p>
+                            <p>Access Level: <span id="accessLevel">
+                                {% if user_plan == 'premium' %}
+                                    Premium
+                                {% elif user_plan == 'standard' %}
+                                    Standard
+                                {% else %}
+                                    Basic
+                                {% endif %}
+                            </span></p>
                             <a href="{% url 'payment' %}" class="btn btn-primary btn-small">Upgrade Plan</a>
                         </div>
                     </div>
@@ -91,7 +99,7 @@
     <div id="pdfModal" class="modal">
         <div class="modal-content modal-large">
             <span class="close" onclick="closePdfModal()">&times;</span>
-            <iframe id="pdfViewer" src="/placeholder.svg" width="100%" height="600px"></iframe>
+            <iframe id="pdfViewer" src="" width="100%" height="600px"></iframe>
         </div>
     </div>
 
@@ -101,12 +109,18 @@
             <span class="close" onclick="closeVideoModal()">&times;</span>
             <div class="video-container">
                 <video id="videoPlayer" controls width="100%">
-                    <source src="/placeholder.svg" type="video/mp4">
+                    <source src="" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
         </div>
     </div>
+
+    <!-- Pass course data to JavaScript -->
+    <script>
+        const coursesData = {{ courses_json|safe }};
+        const userPlan = "{{ user_plan }}";
+    </script>
 
     <script src="{% static 'djangoEDUplatform/script.js' %}"></script>
     <script>

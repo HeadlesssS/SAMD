@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import blogpage,homepage,payment,student,teacher,login_view,signup,success,failure,logout_view
+from .views import blogpage,homepage,payment,student,teacher,login_view,signup,success,failure,logout_view,upload_course
 
 urlpatterns = [
     path('',homepage,name="home"),
@@ -13,4 +13,5 @@ urlpatterns = [
     path("success/",success,name="success"),
     path("failure/",failure,name="failure"),
     path('logout/', logout_view, name='logout'),
+    path('upload_course/', upload_course, name='upload_course'),
 ]
