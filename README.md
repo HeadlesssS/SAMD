@@ -49,10 +49,12 @@ SAMD offers three subscription tiers:
 ![image](https://github.com/user-attachments/assets/e8475cc4-ba95-47f8-82ca-d91828e61b71)
 
 ### Teacher Portal
-![image](https://github.com/user-attachments/assets/2040fea9-f9e9-4467-aa0f-8bd0d793eab7)
+![image](https://github.com/user-attachments/assets/5c1fa4c0-b605-40a4-952c-8a5aabcc6fbc)
+
 
 
 ### Student Dashboard
-![image](https://github.com/user-attachments/assets/5e2bf851-f089-49e3-85ed-92d7f2c772c9)
+![image](https://github.com/user-attachments/assets/53f71d62-4cc0-45bb-9ce3-585602516660)
+
 
 
