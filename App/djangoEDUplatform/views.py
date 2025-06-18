@@ -161,12 +161,59 @@ def teacher(request):
         print("if loop ma aayo")
         try:
             user_profile = request.user.userprofile
-            teacher_obj = Teacher.objects.get(profile=user_profile)
             if user_profile.role.lower() == "teacher":
-                print("vitra")
-                return render(request, "djangoEDUplatform/teacher.html")
-        except (UserProfile.DoesNotExist, Teacher.DoesNotExist):
-            print('UserProfile or Teacher does not exist')
+                try:
+                    # Get teacher object
+                    teacher_obj = Teacher.objects.get(profile=user_profile)
+                    
+                    # Get all courses created by this teacher
+                    teacher_courses = Course.objects.filter(teacher=teacher_obj)
+                    
+                    # Calculate total earnings
+                    total_earnings = 0
+                    courses_with_earnings = []
+                    
+                    for course in teacher_courses:
+                        # Calculate course earnings based on enrolled students and plan price
+                        course_earnings = 0
+                        if course.requiredPlan == 'standard':
+                            course_earnings = course.enrolledStudents * 29 * 0.01  # 1% commission
+                        elif course.requiredPlan == 'premium':
+                            course_earnings = course.enrolledStudents * 59 * 0.01  # 1% commission
+                        
+                        total_earnings += course_earnings
+                        
+                        # Add course with pre-calculated earnings
+                        courses_with_earnings.append({
+                            'course': course,
+                            'earnings': course_earnings
+                        })
+                    
+                    # Calculate monthly earnings (30% of total)
+                    monthly_earnings = total_earnings * 0.3
+                    total_students = sum(course.enrolledStudents for course in teacher_courses)
+                    
+                    return render(request, "djangoEDUplatform/teacher.html", {
+                        'teacher_courses': courses_with_earnings,
+                        'teacher_name': request.user.get_full_name() or request.user.username,
+                        'total_earnings': total_earnings,
+                        'monthly_earnings': monthly_earnings,
+                        'total_students': total_students,
+                        'total_courses': teacher_courses.count(),
+                        'success': request.GET.get('success', None)
+                    })
+                except Teacher.DoesNotExist:
+                    # Create a teacher object if it doesn't exist
+                    teacher_obj = Teacher.objects.create(profile=user_profile)
+                    return render(request, "djangoEDUplatform/teacher.html", {
+                        'teacher_courses': [],
+                        'teacher_name': request.user.get_full_name() or request.user.username,
+                        'total_earnings': 0,
+                        'monthly_earnings': 0,
+                        'total_students': 0,
+                        'total_courses': 0
+                    })
+        except UserProfile.DoesNotExist:
             pass
     return redirect('login')
 
@@ -276,9 +323,7 @@ def upload_course(request):
                 if 'content_file' in request.FILES:
                     course.contentFile = request.FILES['content_file']
                 else:
-                    return render(request, "djangoEDUplatform/teacher.html", {
-                        "error": "Please upload a PDF file."
-                    })
+                    return redirect('teacher')
             elif content_type == 'video':
                 video_url = request.POST.get('video_url')
                 if video_url:
@@ -286,20 +331,16 @@ def upload_course(request):
                     content = ContentFile(video_url.encode('utf-8'))
                     course.contentFile.save(filename, content, save=False)
                 else:
-                    return render(request, "djangoEDUplatform/teacher.html", {
-                        "error": "Please provide a video URL."
-                    })
+                    return redirect('teacher')
             
             course.save()
-            return render(request, "djangoEDUplatform/teacher.html", {
-                "success": "Course uploaded successfully!"
-            })
+            
+            # Redirect back to teacher dashboard with success message
+            return redirect('teacher')
             
         except (UserProfile.DoesNotExist, Teacher.DoesNotExist):
             return redirect('login')
         except Exception as e:
-            return render(request, "djangoEDUplatform/teacher.html", {
-                "error": f"Error uploading course: {str(e)}"
-            })
+            return redirect('teacher')
     
     return redirect('teacher')
